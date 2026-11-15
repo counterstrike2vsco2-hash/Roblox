@@ -1,0 +1,2244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<roblox version="4">
+  <Item class="Workspace" referent="RBX_1">
+    <Properties>
+      <string name="Name">Workspace</string>
+      <bool name="FilteringEnabled">true</bool>
+    </Properties>
+    <Item class="Part" referent="RBX_2">
+      <Properties>
+        <string name="Name">Baseplate</string>
+        <bool name="Anchored">true</bool>
+        <bool name="CanCollide">true</bool>
+        <Vector3 name="size">
+          <X>512</X>
+          <Y>10</Y>
+          <Z>512</Z>
+        </Vector3>
+        <Vector3 name="Position">
+          <X>0</X>
+          <Y>-5</Y>
+          <Z>0</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>0</X>
+          <Y>-5</Y>
+          <Z>0</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <Color3 name="Color">
+          <R>0.11</R>
+          <G>0.12</G>
+          <B>0.14</B>
+        </Color3>
+        <float name="Transparency">0</float>
+        <token name="Material">784</token>
+      </Properties>
+    </Item>
+    <Item class="SpawnLocation" referent="RBX_3">
+      <Properties>
+        <string name="Name">SpawnLocation</string>
+        <bool name="Anchored">true</bool>
+        <bool name="CanCollide">true</bool>
+        <Vector3 name="size">
+          <X>16</X>
+          <Y>1</Y>
+          <Z>16</Z>
+        </Vector3>
+        <Vector3 name="Position">
+          <X>0</X>
+          <Y>0.5</Y>
+          <Z>15</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>0</X>
+          <Y>0.5</Y>
+          <Z>15</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <Color3 name="Color">
+          <R>0.18</R>
+          <G>0.2</G>
+          <B>0.24</B>
+        </Color3>
+        <int name="Duration">0</int>
+      </Properties>
+    </Item>
+  </Item>
+  <Item class="Lighting" referent="RBX_4">
+    <Properties>
+      <string name="Name">Lighting</string>
+      <float name="Brightness">2.2</float>
+      <Color3 name="Ambient">
+        <R>0.25</R>
+        <G>0.25</G>
+        <B>0.3</B>
+      </Color3>
+      <Color3 name="OutdoorAmbient">
+        <R>0.4</R>
+        <G>0.4</G>
+        <B>0.45</B>
+      </Color3>
+      <bool name="GlobalShadows">true</bool>
+      <token name="Technology">3</token>
+    </Properties>
+    <Item class="Sky" referent="RBX_5">
+      <Properties>
+        <string name="Name">Sky</string>
+        <string name="SkyboxBk">rbxassetid://600830446</string>
+        <string name="SkyboxDn">rbxassetid://600831635</string>
+        <string name="SkyboxFt">rbxassetid://600832720</string>
+        <string name="SkyboxLf">rbxassetid://600833862</string>
+        <string name="SkyboxRt">rbxassetid://600835177</string>
+        <string name="SkyboxUp">rbxassetid://600836262</string>
+      </Properties>
+    </Item>
+  </Item>
+  <Item class="ReplicatedStorage" referent="RBX_6">
+    <Properties>
+      <string name="Name">ReplicatedStorage</string>
+    </Properties>
+    <Item class="Folder" referent="RBX_7">
+      <Properties>
+        <string name="Name">Shared</string>
+      </Properties>
+      <Item class="ModuleScript" referent="RBX_8">
+        <Properties>
+          <string name="Name">RagdollModule</string>
+          <string name="Source">--!strict
+-- RagdollModule.luau
+-- Comprehensive, high-performance R15 and R6 Ragdoll System for Roblox
+-- Inspired by Project C.A.R.L. and Ragdoll Engine physics
+
+local RagdollModule = {}
+
+-- Joint angle limit presets for natural anatomical movement
+local JOINT_LIMITS: { [string]: { upperAngle: number, twistLower: number, twistUpper: number } } = {
+	[&quot;Neck&quot;] = { upperAngle = 35, twistLower = -30, twistUpper = 30 },
+	[&quot;Waist&quot;] = { upperAngle = 40, twistLower = -35, twistUpper = 35 },
+	[&quot;LeftShoulder&quot;] = { upperAngle = 80, twistLower = -60, twistUpper = 60 },
+	[&quot;RightShoulder&quot;] = { upperAngle = 80, twistLower = -60, twistUpper = 60 },
+	[&quot;LeftElbow&quot;] = { upperAngle = 80, twistLower = -10, twistUpper = 80 },
+	[&quot;RightElbow&quot;] = { upperAngle = 80, twistLower = -10, twistUpper = 80 },
+	[&quot;LeftWrist&quot;] = { upperAngle = 40, twistLower = -40, twistUpper = 40 },
+	[&quot;RightWrist&quot;] = { upperAngle = 40, twistLower = -40, twistUpper = 40 },
+	[&quot;LeftHip&quot;] = { upperAngle = 55, twistLower = -40, twistUpper = 40 },
+	[&quot;RightHip&quot;] = { upperAngle = 55, twistLower = -40, twistUpper = 40 },
+	[&quot;LeftKnee&quot;] = { upperAngle = 85, twistLower = -10, twistUpper = 85 },
+	[&quot;RightKnee&quot;] = { upperAngle = 85, twistLower = -10, twistUpper = 85 },
+	[&quot;LeftAnkle&quot;] = { upperAngle = 30, twistLower = -30, twistUpper = 30 },
+	[&quot;RightAnkle&quot;] = { upperAngle = 30, twistLower = -30, twistUpper = 30 },
+	-- Fallbacks for R6 joints
+	[&quot;Left Shoulder&quot;] = { upperAngle = 80, twistLower = -60, twistUpper = 60 },
+	[&quot;Right Shoulder&quot;] = { upperAngle = 80, twistLower = -60, twistUpper = 60 },
+	[&quot;Left Hip&quot;] = { upperAngle = 55, twistLower = -40, twistUpper = 40 },
+	[&quot;Right Hip&quot;] = { upperAngle = 55, twistLower = -40, twistUpper = 40 },
+}
+
+-- Default limit if joint name is unlisted
+local DEFAULT_LIMIT = { upperAngle = 60, twistLower = -45, twistUpper = 45 }
+
+-- Set up attachments, ball sockets, and collision constraints for a character
+function RagdollModule.SetupCharacter(character: Model)
+	local humanoid = character:FindFirstChildOfClass(&quot;Humanoid&quot;)
+	if not humanoid then return end
+
+	-- Mark as having ragdoll setup
+	if character:FindFirstChild(&quot;RagdollConstraints&quot;) then return end
+
+	local constraintFolder = Instance.new(&quot;Folder&quot;)
+	constraintFolder.Name = &quot;RagdollConstraints&quot;
+	constraintFolder.Parent = character
+
+	local isRagdolledValue = character:FindFirstChild(&quot;IsRagdolled&quot;)
+	if not isRagdolledValue then
+		local val = Instance.new(&quot;BoolValue&quot;)
+		val.Name = &quot;IsRagdolled&quot;
+		val.Value = false
+		val.Parent = character
+	end
+
+	-- Prevent character from breaking joints on death (keeps body intact as ragdoll!)
+	humanoid.BreakJointsOnDeath = false
+
+	-- Scan all Motor6Ds
+	for _, desc in character:GetDescendants() do
+		if desc:IsA(&quot;Motor6D&quot;) then
+			local motor = desc :: Motor6D
+			local part0 = motor.Part0
+			local part1 = motor.Part1
+
+			-- Ignore Root joint (keeps HumanoidRootPart anchored to LowerTorso so camera follows)
+			if motor.Name == &quot;Root&quot; or motor.Name == &quot;RootJoint&quot; then
+				continue
+			end
+
+			if part0 and part1 then
+				-- Attachment 0
+				local att0 = Instance.new(&quot;Attachment&quot;)
+				att0.Name = &quot;RagdollAtt0_&quot; .. motor.Name
+				att0.CFrame = motor.C0
+				att0.Parent = part0
+
+				-- Attachment 1
+				local att1 = Instance.new(&quot;Attachment&quot;)
+				att1.Name = &quot;RagdollAtt1_&quot; .. motor.Name
+				att1.CFrame = motor.C1
+				att1.Parent = part1
+
+				-- BallSocketConstraint
+				local socket = Instance.new(&quot;BallSocketConstraint&quot;)
+				socket.Name = &quot;RagdollSocket_&quot; .. motor.Name
+				socket.Attachment0 = att0
+				socket.Attachment1 = att1
+				socket.LimitsEnabled = true
+				socket.TwistLimitsEnabled = true
+
+				local limits = JOINT_LIMITS[motor.Name] or DEFAULT_LIMIT
+				socket.UpperAngle = limits.upperAngle
+				socket.TwistLowerAngle = limits.twistLower
+				socket.TwistUpperAngle = limits.twistUpper
+				socket.Restitution = 0.15
+				socket.Enabled = false
+				socket.Parent = constraintFolder
+
+				-- NoCollisionConstraint between adjacent parts
+				local noCol = Instance.new(&quot;NoCollisionConstraint&quot;)
+				noCol.Name = &quot;NoCol_&quot; .. part0.Name .. &quot;_&quot; .. part1.Name
+				noCol.Part0 = part0
+				noCol.Part1 = part1
+				noCol.Parent = constraintFolder
+			end
+		end
+	end
+
+	-- Also disable collision between limbs and Torso/RootPart to avoid self-flinging
+	local rootPart = character:FindFirstChild(&quot;HumanoidRootPart&quot;) :: BasePart?
+	if rootPart then
+		for _, part in character:GetChildren() do
+			if part:IsA(&quot;BasePart&quot;) and part ~= rootPart then
+				local noCol = Instance.new(&quot;NoCollisionConstraint&quot;)
+				noCol.Name = &quot;RootNoCol_&quot; .. part.Name
+				noCol.Part0 = rootPart
+				noCol.Part1 = part
+				noCol.Parent = constraintFolder
+			end
+		end
+	end
+end
+
+-- Checks if character is currently ragdolled
+function RagdollModule.IsRagdolled(character: Model): boolean
+	local val = character:FindFirstChild(&quot;IsRagdolled&quot;) :: BoolValue?
+	return val ~= nil and val.Value == true
+end
+
+-- Toggle ragdoll on or off
+function RagdollModule.ToggleRagdoll(character: Model, impulse: Vector3?): boolean
+	local current = RagdollModule.IsRagdolled(character)
+	RagdollModule.SetRagdoll(character, not current, impulse)
+	return not current
+end
+
+-- Set ragdoll state explicitly
+function RagdollModule.SetRagdoll(character: Model, enable: boolean, impulse: Vector3?)
+	local humanoid = character:FindFirstChildOfClass(&quot;Humanoid&quot;)
+	if not humanoid then return end
+
+	local rootPart = character:FindFirstChild(&quot;HumanoidRootPart&quot;) :: BasePart?
+	local constraintsFolder = character:FindFirstChild(&quot;RagdollConstraints&quot;)
+	if not constraintsFolder then
+		RagdollModule.SetupCharacter(character)
+		constraintsFolder = character:FindFirstChild(&quot;RagdollConstraints&quot;)
+	end
+
+	local isRagdolledVal = character:FindFirstChild(&quot;IsRagdolled&quot;) :: BoolValue?
+	if isRagdolledVal then
+		isRagdolledVal.Value = enable
+	end
+
+	if enable then
+		-- ENABLE RAGDOLL
+		humanoid.AutoRotate = false
+
+		-- Stop playing animations
+		local animator = humanoid:FindFirstChildOfClass(&quot;Animator&quot;)
+		if animator then
+			for _, track in animator:GetPlayingAnimationTracks() do
+				track:Stop(0.1)
+			end
+		end
+
+		-- Switch humanoid state
+		humanoid.PlatformStand = true
+		humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+
+		-- Disable Motor6D joints and enable BallSockets
+		for _, desc in character:GetDescendants() do
+			if desc:IsA(&quot;Motor6D&quot;) then
+				if desc.Name ~= &quot;Root&quot; and desc.Name ~= &quot;RootJoint&quot; then
+					desc.Enabled = false
+				end
+			end
+		end
+
+		if constraintsFolder then
+			for _, constraint in constraintsFolder:GetChildren() do
+				if constraint:IsA(&quot;BallSocketConstraint&quot;) then
+					constraint.Enabled = true
+				end
+			end
+		end
+
+		-- Set part collisions: body parts collide, root part does not
+		if rootPart then
+			rootPart.CanCollide = false
+		end
+
+		for _, part in character:GetChildren() do
+			if part:IsA(&quot;BasePart&quot;) and part ~= rootPart then
+				-- Skip invisible organ hitboxes
+				if not part:GetAttribute(&quot;IsOrgan&quot;) then
+					part.CanCollide = true
+				end
+			end
+		end
+
+		-- Apply optional physics impulse (e.g. from gunshot or shove)
+		if impulse then
+			local torso = character:FindFirstChild(&quot;UpperTorso&quot;) or character:FindFirstChild(&quot;Torso&quot;) or rootPart
+			if torso and torso:IsA(&quot;BasePart&quot;) then
+				torso:ApplyImpulse(impulse * torso.AssemblyMass)
+			end
+		end
+
+	else
+		-- DISABLE RAGDOLL (GET UP)
+		if humanoid.Health &lt;= 0 then
+			-- Dead characters cannot get up
+			return
+		end
+
+		-- Disable BallSockets and re-enable Motor6D joints
+		if constraintsFolder then
+			for _, constraint in constraintsFolder:GetChildren() do
+				if constraint:IsA(&quot;BallSocketConstraint&quot;) then
+					constraint.Enabled = false
+				end
+			end
+		end
+
+		for _, desc in character:GetDescendants() do
+			if desc:IsA(&quot;Motor6D&quot;) then
+				desc.Enabled = true
+			end
+		end
+
+		-- Reset part collisions
+		if rootPart then
+			rootPart.CanCollide = true
+		end
+
+		for _, part in character:GetChildren() do
+			if part:IsA(&quot;BasePart&quot;) and part ~= rootPart then
+				part.CanCollide = false
+			end
+		end
+
+		-- Smooth getup recovery
+		humanoid.PlatformStand = false
+		humanoid.AutoRotate = true
+
+		if rootPart then
+			-- Slightly elevate to avoid clipping through floor
+			local currentPos = rootPart.Position
+			local look = rootPart.CFrame.LookVector
+			local flatLook = Vector3.new(look.X, 0, look.Z).Unit
+			if flatLook.Magnitude == 0 or flatLook ~= flatLook then
+				flatLook = Vector3.new(0, 0, -1)
+			end
+			rootPart.CFrame = CFrame.new(currentPos + Vector3.new(0, 2.5, 0), currentPos + Vector3.new(0, 2.5, 0) + flatLook)
+			rootPart.AssemblyLinearVelocity = Vector3.zero
+			rootPart.AssemblyAngularVelocity = Vector3.zero
+		end
+
+		humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+	end
+end
+
+return RagdollModule
+</string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX_9">
+        <Properties>
+          <string name="Name">BloodEngine</string>
+          <string name="Source">--!strict
+-- BloodEngine.luau
+-- Physics-based Blood Splatters, Arterial Fountains, Organ Penetration, and Decals
+-- Inspired by Project C.A.R.L. and Advanced Blood Engine
+
+local Debris = game:GetService(&quot;Debris&quot;)
+local TweenService = game:GetService(&quot;TweenService&quot;)
+local Workspace = game:GetService(&quot;Workspace&quot;)
+
+local BloodEngine = {}
+
+-- Organ damage and effect definitions
+export type OrganHitResult = {
+	hitOrgan: boolean,
+	organName: string?,
+	damage: number,
+	isFatal: boolean,
+	forceRagdoll: boolean,
+	message: string?,
+	color: Color3,
+}
+
+local ORGAN_DATA: { [string]: { damage: number, isFatal: boolean, forceRagdoll: boolean, message: string, color: Color3 } } = {
+	[&quot;Brain&quot;] = {
+		damage = 100,
+		isFatal = true,
+		forceRagdoll = true,
+		message = &quot;🎯 HEADSHOT: МОЗГ УНИЧТОЖЕН!&quot;,
+		color = Color3.fromRGB(255, 60, 60),
+	},
+	[&quot;Heart&quot;] = {
+		damage = 80,
+		isFatal = true,
+		forceRagdoll = true,
+		message = &quot;❤️ ПРОБИТИЕ СЕРДЦА: АРТЕРИАЛЬНОЕ КРОВОТЕЧЕНИЕ!&quot;,
+		color = Color3.fromRGB(220, 20, 20),
+	},
+	[&quot;Spine&quot;] = {
+		damage = 60,
+		isFatal = false,
+		forceRagdoll = true,
+		message = &quot;🦴 ПОЗВОНОЧНИК СЛОМАН: ПАРАЛИЧ!&quot;,
+		color = Color3.fromRGB(255, 170, 50),
+	},
+	[&quot;LeftLung&quot;] = {
+		damage = 45,
+		isFatal = false,
+		forceRagdoll = true,
+		message = &quot;🫁 ЛЕВОЕ ЛЕГКОЕ ПРОБИТО!&quot;,
+		color = Color3.fromRGB(220, 100, 120),
+	},
+	[&quot;RightLung&quot;] = {
+		damage = 45,
+		isFatal = false,
+		forceRagdoll = true,
+		message = &quot;🫁 ПРАВОЕ ЛЕГКОЕ ПРОБИТО!&quot;,
+		color = Color3.fromRGB(220, 100, 120),
+	},
+	[&quot;Stomach&quot;] = {
+		damage = 35,
+		isFatal = false,
+		forceRagdoll = true,
+		message = &quot;🩸 БРЮШНОЕ РАНЕНИЕ!&quot;,
+		color = Color3.fromRGB(180, 50, 50),
+	},
+}
+
+-- Checks if a ray penetrates any internal organs inside the target character
+function BloodEngine.CheckOrganPenetration(character: Model, rayOrigin: Vector3, rayDirection: Vector3): OrganHitResult
+	local raycastParams = RaycastParams.new()
+	raycastParams.FilterDescendantsInstances = { character }
+	raycastParams.FilterType = RaycastFilterType.Include
+	raycastParams.IgnoreWater = true
+
+	-- Cast ray through character to detect any organ hitboxes
+	local result = Workspace:Raycast(rayOrigin, rayDirection * 10, raycastParams)
+	if result and result.Instance then
+		local hitPart = result.Instance
+		local organName = hitPart.Name
+
+		-- Check if it matches an organ
+		if ORGAN_DATA[organName] then
+			local data = ORGAN_DATA[organName]
+			return {
+				hitOrgan = true,
+				organName = organName,
+				damage = data.damage,
+				isFatal = data.isFatal,
+				forceRagdoll = data.forceRagdoll,
+				message = data.message,
+				color = data.color,
+			}
+		end
+	end
+
+	-- Also check proximity to organs inside character if ray hit a body part
+	local organs = {}
+	for _, child in character:GetChildren() do
+		if child:IsA(&quot;BasePart&quot;) and child:GetAttribute(&quot;IsOrgan&quot;) then
+			table.insert(organs, child)
+		end
+	end
+
+	-- Secondary penetration check against organ bounding boxes
+	for _, organ in organs do
+		local organPos = organ.Position
+		local toOrgan = organPos - rayOrigin
+		local projection = toOrgan:Dot(rayDirection.Unit)
+		if projection &gt; 0 and projection &lt; rayDirection.Magnitude + 5 then
+			local closestPoint = rayOrigin + rayDirection.Unit * projection
+			local distance = (closestPoint - organPos).Magnitude
+			local maxRadius = (organ.Size.Magnitude / 2) + 0.3
+			if distance &lt;= maxRadius then
+				local data = ORGAN_DATA[organ.Name] or {
+					damage = 40,
+					isFatal = false,
+					forceRagdoll = true,
+					message = &quot;🩸 ВНУТРЕННИЙ ОРГАН ПОВРЕЖДЕН!&quot;,
+					color = Color3.fromRGB(200, 30, 30),
+				}
+				return {
+					hitOrgan = true,
+					organName = organ.Name,
+					damage = data.damage,
+					isFatal = data.isFatal,
+					forceRagdoll = data.forceRagdoll,
+					message = data.message,
+					color = data.color,
+				}
+			end
+		end
+	end
+
+	return {
+		hitOrgan = false,
+		organName = nil,
+		damage = 25,
+		isFatal = false,
+		forceRagdoll = false,
+		message = nil,
+		color = Color3.fromRGB(150, 20, 20),
+	}
+end
+
+-- Create burst of blood particles at hit position
+function BloodEngine.SpawnBloodParticles(position: Vector3, normal: Vector3, intensity: number?)
+	local count = intensity or 15
+
+	local emitterPart = Instance.new(&quot;Part&quot;)
+	emitterPart.Name = &quot;BloodEmitter&quot;
+	emitterPart.Size = Vector3.new(0.2, 0.2, 0.2)
+	emitterPart.Position = position
+	emitterPart.Anchored = true
+	emitterPart.CanCollide = false
+	emitterPart.Transparency = 1
+	emitterPart.Parent = Workspace
+
+	local emitter = Instance.new(&quot;ParticleEmitter&quot;)
+	emitter.Color = ColorSequence.new(Color3.fromRGB(130, 0, 0), Color3.fromRGB(90, 0, 0))
+	emitter.Size = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.35),
+		NumberSequenceKeypoint.new(1, 0.1),
+	})
+	emitter.Texture = &quot;rbxassetid://241594419&quot; -- Smooth circle particle
+	emitter.Lifetime = NumberRange.new(0.4, 0.9)
+	emitter.Rate = 0
+	emitter.Speed = NumberRange.new(8, 22)
+	emitter.SpreadAngle = Vector2.new(45, 45)
+	emitter.EmissionDirection = Enum.NormalId.Top
+	emitter.Acceleration = Vector3.new(0, -45, 0)
+	emitter.Parent = emitterPart
+
+	-- Orient emitter along normal
+	emitterPart.CFrame = CFrame.lookAt(position, position + normal)
+	emitter:Emit(count)
+
+	Debris:AddItem(emitterPart, 1.5)
+end
+
+-- Spawn blood splatters on surfaces nearby
+function BloodEngine.CreateSurfaceSplatters(origin: Vector3, direction: Vector3, count: number?)
+	local splatterCount = count or 4
+	local filter = RaycastParams.new()
+	filter.FilterType = RaycastFilterType.Exclude
+	filter.IgnoreWater = true
+
+	for _ = 1, splatterCount do
+		-- Random spray angle
+		local randDir = (direction + Vector3.new(
+			(math.random() - 0.5) * 1.2,
+			(math.random() - 0.5) * 1.2,
+			(math.random() - 0.5) * 1.2
+		)).Unit
+
+		local rayResult = Workspace:Raycast(origin, randDir * 12, filter)
+		if rayResult and rayResult.Instance and rayResult.Instance.CanCollide then
+			local hitPos = rayResult.Position
+			local hitNormal = rayResult.Normal
+
+			-- Create small blood decal part
+			local splatter = Instance.new(&quot;Part&quot;)
+			splatter.Name = &quot;BloodSplatter&quot;
+			local size = math.random(8, 18) / 10
+			splatter.Size = Vector3.new(size, 0.05, size)
+			splatter.CFrame = CFrame.lookAt(hitPos + hitNormal * 0.02, hitPos + hitNormal) * CFrame.Angles(math.pi / 2, 0, math.random() * math.pi)
+			splatter.Anchored = true
+			splatter.CanCollide = false
+			splatter.Material = Enum.Material.Glass
+			splatter.Color = Color3.fromRGB(110, 0, 0)
+			splatter.Transparency = 0.15
+			splatter.CastShadow = false
+			splatter.Parent = Workspace
+
+			-- Fade out and remove after 20 seconds
+			task.delay(18, function()
+				if splatter and splatter.Parent then
+					local tween = TweenService:Create(splatter, TweenInfo.new(2), { Transparency = 1 })
+					tween:Play()
+					tween.Completed:Connect(function()
+						splatter:Destroy()
+					end)
+				end
+			end)
+		end
+	end
+end
+
+-- Create expanding puddle of blood on the floor under a body
+function BloodEngine.CreateBloodPuddle(groundPosition: Vector3, maxRadius: number?)
+	local targetSize = maxRadius or 3.5
+
+	local puddle = Instance.new(&quot;Part&quot;)
+	puddle.Name = &quot;BloodPuddle&quot;
+	puddle.Size = Vector3.new(0.2, 0.02, 0.2)
+	puddle.Position = groundPosition + Vector3.new(0, 0.02, 0)
+	puddle.Anchored = true
+	puddle.CanCollide = false
+	puddle.Material = Enum.Material.Glass
+	puddle.Color = Color3.fromRGB(120, 0, 0)
+	puddle.Transparency = 0.2
+	puddle.CastShadow = false
+	puddle.Shape = Enum.PartType.Cylinder
+	-- Orient cylinder flat on ground
+	puddle.CFrame = CFrame.new(puddle.Position) * CFrame.Angles(0, 0, math.pi / 2)
+	puddle.Parent = Workspace
+
+	-- Expand over 4 seconds
+	local tween = TweenService:Create(puddle, TweenInfo.new(4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Size = Vector3.new(0.02, targetSize, targetSize)
+	})
+	tween:Play()
+
+	-- Clean up after 30 seconds
+	Debris:AddItem(puddle, 30)
+end
+
+-- Create arterial blood spray fountain from a ruptured heart or vessel
+function BloodEngine.CreateArterialFountain(attachmentParent: BasePart, duration: number?)
+	local streamDuration = duration or 3.5
+
+	local att = Instance.new(&quot;Attachment&quot;)
+	att.Name = &quot;ArterialAttachment&quot;
+	att.Parent = attachmentParent
+
+	local fountain = Instance.new(&quot;ParticleEmitter&quot;)
+	fountain.Name = &quot;ArterialSpray&quot;
+	fountain.Color = ColorSequence.new(Color3.fromRGB(150, 0, 0), Color3.fromRGB(100, 0, 0))
+	fountain.Size = NumberSequence.new(0.2, 0.4)
+	fountain.Texture = &quot;rbxassetid://241594419&quot;
+	fountain.Lifetime = NumberRange.new(0.5, 0.8)
+	fountain.Rate = 35
+	fountain.Speed = NumberRange.new(12, 18)
+	fountain.SpreadAngle = Vector2.new(15, 15)
+	fountain.Acceleration = Vector3.new(0, -35, 0)
+	fountain.Parent = att
+
+	-- Stop after duration
+	task.delay(streamDuration, function()
+		if fountain and fountain.Parent then
+			fountain.Enabled = false
+			Debris:AddItem(att, 1)
+		end
+	end)
+end
+
+return BloodEngine
+</string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX_10">
+        <Properties>
+          <string name="Name">WeaponConfig</string>
+          <string name="Source">--!strict
+-- WeaponConfig.luau
+-- Weapon ballistic parameters, kinetic impulses, and sound settings
+
+local WeaponConfig = {
+	Pistol = {
+		Name = &quot;Пистолет 9mm (Pistol)&quot;,
+		Damage = 35,
+		HeadshotMultiplier = 2.5,
+		FireRate = 0.2, -- seconds between shots
+		Range = 300,
+		Spread = 0.015,
+		ImpulseForce = 45, -- kinetic impulse applied to ragdoll body
+		SoundId = &quot;rbxassetid://131070686&quot;, -- gunshot
+	},
+	Shotgun = {
+		Name = &quot;Дробовик 12G (Shotgun)&quot;,
+		DamagePerPellet = 15,
+		PelletCount = 8,
+		FireRate = 0.85,
+		Range = 150,
+		Spread = 0.08,
+		ImpulseForce = 85, -- massive blast knockback
+		SoundId = &quot;rbxassetid://142494488&quot;, -- shotgun blast
+	},
+	PushTool = {
+		Name = &quot;Толкатель (Push Hands)&quot;,
+		Cooldown = 1.0,
+		Range = 8,
+		ImpulseForward = 65,
+		ImpulseUp = 25,
+		SoundId = &quot;rbxassetid://138090596&quot;, -- whoosh/hit
+	},
+	RagdollWand = {
+		Name = &quot;Жезл Рэгдолла (Ragdoll Wand)&quot;,
+		Range = 100,
+		FlingForce = 120,
+		SoundId = &quot;rbxassetid://131237241&quot;, -- magic hit
+	},
+}
+
+return WeaponConfig
+</string>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="RemoteEvent" referent="RBX_11">
+      <Properties>
+        <string name="Name">ToggleRagdoll</string>
+      </Properties>
+    </Item>
+    <Item class="RemoteEvent" referent="RBX_12">
+      <Properties>
+        <string name="Name">RequestPush</string>
+      </Properties>
+    </Item>
+    <Item class="RemoteEvent" referent="RBX_13">
+      <Properties>
+        <string name="Name">ShootWeapon</string>
+      </Properties>
+    </Item>
+    <Item class="RemoteEvent" referent="RBX_14">
+      <Properties>
+        <string name="Name">OrganHitEvent</string>
+      </Properties>
+    </Item>
+    <Item class="RemoteEvent" referent="RBX_15">
+      <Properties>
+        <string name="Name">ToggleXRay</string>
+      </Properties>
+    </Item>
+    <Item class="RemoteEvent" referent="RBX_16">
+      <Properties>
+        <string name="Name">ResetDummy</string>
+      </Properties>
+    </Item>
+  </Item>
+  <Item class="ServerScriptService" referent="RBX_17">
+    <Properties>
+      <string name="Name">ServerScriptService</string>
+    </Properties>
+    <Item class="Script" referent="RBX_18">
+      <Properties>
+        <string name="Name">RagdollServer</string>
+        <string name="Source">--!strict
+-- RagdollServer.server.luau
+-- Authoritative server management for player and dummy ragdolls, ballistic penetration, and combat events
+
+local Players = game:GetService(&quot;Players&quot;)
+local ReplicatedStorage = game:GetService(&quot;ReplicatedStorage&quot;)
+local Workspace = game:GetService(&quot;Workspace&quot;)
+
+local Shared = ReplicatedStorage:WaitForChild(&quot;Shared&quot;)
+local RagdollModule = require(Shared:WaitForChild(&quot;RagdollModule&quot;))
+local BloodEngine = require(Shared:WaitForChild(&quot;BloodEngine&quot;))
+local WeaponConfig = require(Shared:WaitForChild(&quot;WeaponConfig&quot;))
+
+-- Create or get RemoteEvents
+local function getOrCreateRemote(name: string): RemoteEvent
+	local remote = ReplicatedStorage:FindFirstChild(name)
+	if not remote then
+		remote = Instance.new(&quot;RemoteEvent&quot;)
+		remote.Name = name
+		remote.Parent = ReplicatedStorage
+	end
+	return remote :: RemoteEvent
+end
+
+local ToggleRagdollRemote = getOrCreateRemote(&quot;ToggleRagdoll&quot;)
+local RequestPushRemote = getOrCreateRemote(&quot;RequestPush&quot;)
+local ShootWeaponRemote = getOrCreateRemote(&quot;ShootWeapon&quot;)
+local OrganHitRemote = getOrCreateRemote(&quot;OrganHitEvent&quot;)
+local ToggleXRayRemote = getOrCreateRemote(&quot;ToggleXRay&quot;)
+local ResetDummyRemote = getOrCreateRemote(&quot;ResetDummy&quot;)
+
+-- Set up player character when spawned
+local function onCharacterAdded(character: Model, player: Player)
+	local humanoid = character:WaitForChild(&quot;Humanoid&quot;) :: Humanoid
+	local rootPart = character:WaitForChild(&quot;HumanoidRootPart&quot;) :: BasePart
+
+	-- Set up ragdoll joints
+	RagdollModule.SetupCharacter(character)
+
+	-- Keep character intact as ragdoll on death
+	humanoid.Died:Connect(function()
+		RagdollModule.SetRagdoll(character, true, Vector3.new(0, -10, 0))
+	end)
+
+	-- Fall impact check: if falling with high downward velocity, trigger ragdoll on hard landing
+	local lastVelocityY = 0
+	task.spawn(function()
+		while character and character.Parent and humanoid.Health &gt; 0 do
+			if rootPart and rootPart.Parent then
+				local currentVelY = rootPart.AssemblyLinearVelocity.Y
+				if lastVelocityY &lt; -65 and currentVelY &gt; -10 then
+					-- Hard impact with ground!
+					RagdollModule.SetRagdoll(character, true, Vector3.new(0, 5, 0))
+					BloodEngine.SpawnBloodParticles(rootPart.Position, Vector3.new(0, 1, 0), 10)
+				end
+				lastVelocityY = currentVelY
+			end
+			task.wait(0.1)
+		end
+	end)
+end
+
+Players.PlayerAdded:Connect(function(player)
+	player.CharacterAdded:Connect(function(char)
+		onCharacterAdded(char, player)
+	end)
+	if player.Character then
+		onCharacterAdded(player.Character, player)
+	end
+end)
+
+-- Handle player [F] key or UI button to toggle ragdoll
+ToggleRagdollRemote.OnServerEvent:Connect(function(player, targetCharacter: Model?)
+	local charToToggle = targetCharacter or player.Character
+	if charToToggle and charToToggle:FindFirstChildOfClass(&quot;Humanoid&quot;) then
+		local humanoid = charToToggle:FindFirstChildOfClass(&quot;Humanoid&quot;)
+		if humanoid and humanoid.Health &gt; 0 then
+			RagdollModule.ToggleRagdoll(charToToggle)
+		end
+	end
+end)
+
+-- Handle Push Tool action
+RequestPushRemote.OnServerEvent:Connect(function(player, targetCharacter: Model)
+	local playerChar = player.Character
+	if not playerChar then return end
+	local playerHrp = playerChar:FindFirstChild(&quot;HumanoidRootPart&quot;) :: BasePart?
+	if not playerHrp then return end
+
+	local targetHrp = targetCharacter:FindFirstChild(&quot;HumanoidRootPart&quot;) :: BasePart?
+	local targetHumanoid = targetCharacter:FindFirstChildOfClass(&quot;Humanoid&quot;)
+	if not targetHrp or not targetHumanoid or targetHumanoid.Health &lt;= 0 then return end
+
+	-- Check distance
+	local dist = (playerHrp.Position - targetHrp.Position).Magnitude
+	if dist &lt;= 12 then
+		local pushDir = playerHrp.CFrame.LookVector
+		local impulse = pushDir * WeaponConfig.PushTool.ImpulseForward + Vector3.new(0, WeaponConfig.PushTool.ImpulseUp, 0)
+
+		-- Force ragdoll on target and fling forward
+		RagdollModule.SetRagdoll(targetCharacter, true, impulse)
+		targetHumanoid:TakeDamage(5)
+		BloodEngine.SpawnBloodParticles(targetHrp.Position, pushDir, 5)
+	end
+end)
+
+-- Handle Weapon Fire (Pistols, Shotguns, etc.)
+ShootWeaponRemote.OnServerEvent:Connect(function(player, weaponName: string, rayOrigin: Vector3, rayDirection: Vector3)
+	local playerChar = player.Character
+	if not playerChar then return end
+
+	local config = WeaponConfig[weaponName] or WeaponConfig.Pistol
+	local raycastParams = RaycastParams.new()
+	raycastParams.FilterDescendantsInstances = { playerChar }
+	raycastParams.FilterType = RaycastFilterType.Exclude
+	raycastParams.IgnoreWater = true
+
+	local result = Workspace:Raycast(rayOrigin, rayDirection * config.Range, raycastParams)
+	if result and result.Instance then
+		local hitPart = result.Instance
+		local hitPos = result.Position
+		local hitNormal = result.Normal
+
+		-- Find if hit a character
+		local targetModel = hitPart:FindFirstAncestorOfClass(&quot;Model&quot;)
+		local targetHumanoid = targetModel and targetModel:FindFirstChildOfClass(&quot;Humanoid&quot;)
+
+		if targetModel and targetHumanoid and targetHumanoid.Health &gt; 0 then
+			-- Check organ penetration
+			local organResult = BloodEngine.CheckOrganPenetration(targetModel, hitPos, rayDirection)
+
+			local damage = config.Damage or 25
+			local forceRagdoll = false
+
+			if organResult.hitOrgan then
+				damage = organResult.damage
+				forceRagdoll = organResult.forceRagdoll
+
+				-- Send notification to shooter client for HUD combat text
+				OrganHitRemote:FireClient(player, organResult)
+
+				-- Arterial fountain if heart was hit
+				if organResult.organName == &quot;Heart&quot; then
+					local torso = targetModel:FindFirstChild(&quot;UpperTorso&quot;) or hitPart
+					if torso:IsA(&quot;BasePart&quot;) then
+						BloodEngine.CreateArterialFountain(torso, 4)
+					end
+				end
+			elseif hitPart.Name == &quot;Head&quot; then
+				damage = damage * (config.HeadshotMultiplier or 2)
+				forceRagdoll = true
+				OrganHitRemote:FireClient(player, {
+					hitOrgan = true,
+					organName = &quot;Head&quot;,
+					message = &quot;🎯 ВЫСТРЕЛ В ГОЛОВУ! (HEADSHOT)&quot;,
+					color = Color3.fromRGB(255, 80, 80),
+					damage = damage,
+				})
+			end
+
+			-- Apply damage
+			targetHumanoid:TakeDamage(damage)
+
+			-- Trigger ragdoll if lethal, fatal organ, or heavy blast
+			if forceRagdoll or targetHumanoid.Health &lt;= 0 or weaponName == &quot;Shotgun&quot; then
+				local impulseVector = rayDirection.Unit * config.ImpulseForce + Vector3.new(0, 10, 0)
+				RagdollModule.SetRagdoll(targetModel, true, impulseVector)
+			end
+
+			-- Spawn blood FX
+			BloodEngine.SpawnBloodParticles(hitPos, hitNormal, 18)
+			BloodEngine.CreateSurfaceSplatters(hitPos, rayDirection, 5)
+
+			-- If heavily damaged or ragdolled, spawn floor puddle
+			local floorRay = Workspace:Raycast(hitPos, Vector3.new(0, -10, 0))
+			if floorRay then
+				BloodEngine.CreateBloodPuddle(floorRay.Position, 2.5)
+			end
+		else
+			-- Hit environmental surface (wall/floor/box)
+			BloodEngine.CreateSurfaceSplatters(hitPos, rayDirection, 2)
+		end
+	end
+end)
+
+-- Handle X-Ray mode toggle for Dummies (sets skin transparency to show internal organs)
+local isXRayActive = false
+ToggleXRayRemote.OnServerEvent:Connect(function(player)
+	isXRayActive = not isXRayActive
+	for _, desc in Workspace:GetDescendants() do
+		if desc:IsA(&quot;Model&quot;) and desc:GetAttribute(&quot;IsDummy&quot;) then
+			for _, part in desc:GetChildren() do
+				if part:IsA(&quot;BasePart&quot;) then
+					if part:GetAttribute(&quot;IsOrgan&quot;) then
+						-- Organ always visible
+						part.Transparency = isXRayActive and 0.1 or 0.8
+					else
+						-- Skin part
+						part.Transparency = isXRayActive and 0.65 or 0
+					end
+				end
+			end
+		end
+	end
+end)
+
+-- Handle Dummy Reset / Revive
+ResetDummyRemote.OnServerEvent:Connect(function(player, dummyModel: Model)
+	if dummyModel and dummyModel:FindFirstChildOfClass(&quot;Humanoid&quot;) then
+		local humanoid = dummyModel:FindFirstChildOfClass(&quot;Humanoid&quot;) :: Humanoid
+		humanoid.Health = humanoid.MaxHealth
+		RagdollModule.SetRagdoll(dummyModel, false)
+
+		local rootPart = dummyModel:FindFirstChild(&quot;HumanoidRootPart&quot;) :: BasePart?
+		local originalPos = dummyModel:GetAttribute(&quot;SpawnPosition&quot;) :: Vector3?
+		if rootPart and originalPos then
+			rootPart.CFrame = CFrame.new(originalPos)
+			rootPart.AssemblyLinearVelocity = Vector3.zero
+			rootPart.AssemblyAngularVelocity = Vector3.zero
+		end
+	end
+end)
+
+print(&quot;[Server] Ragdoll Server initialized successfully.&quot;)
+</string>
+      </Properties>
+    </Item>
+    <Item class="Script" referent="RBX_19">
+      <Properties>
+        <string name="Name">DummyManager</string>
+        <string name="Source">--!strict
+-- DummyManager.server.luau
+-- Spawns, rigs, and manages anatomical R15 Dummies (Project C.A.R.L. style) with internal organs and ProximityPrompts
+
+local Workspace = game:GetService(&quot;Workspace&quot;)
+local ReplicatedStorage = game:GetService(&quot;ReplicatedStorage&quot;)
+
+local Shared = ReplicatedStorage:WaitForChild(&quot;Shared&quot;)
+local RagdollModule = require(Shared:WaitForChild(&quot;RagdollModule&quot;))
+
+local DummyManager = {}
+
+-- Helper to create an R15 body part
+local function createPart(name: string, size: Vector3, color: Color3, parent: Instance): Part
+	local part = Instance.new(&quot;Part&quot;)
+	part.Name = name
+	part.Size = size
+	part.Color = color
+	part.Material = Enum.Material.SmoothPlastic
+	part.TopSurface = Enum.SurfaceType.Smooth
+	part.BottomSurface = Enum.SurfaceType.Smooth
+	part.CanCollide = true
+	part.Parent = parent
+	return part
+end
+
+-- Helper to create Motor6D
+local function createMotor(name: string, part0: BasePart, part1: BasePart, c0: CFrame, c1: CFrame, parent: Instance): Motor6D
+	local motor = Instance.new(&quot;Motor6D&quot;)
+	motor.Name = name
+	motor.Part0 = part0
+	motor.Part1 = part1
+	motor.C0 = c0
+	motor.C1 = c1
+	motor.Parent = parent
+	return motor
+end
+
+-- Build full R15 anatomical dummy
+function DummyManager.CreateCarlDummy(spawnCFrame: CFrame, name: string?): Model
+	local dummy = Instance.new(&quot;Model&quot;)
+	dummy.Name = name or &quot;C.A.R.L. (Anatomy Dummy)&quot;
+	dummy:SetAttribute(&quot;IsDummy&quot;, true)
+	dummy:SetAttribute(&quot;SpawnPosition&quot;, spawnCFrame.Position)
+
+	local humanoid = Instance.new(&quot;Humanoid&quot;)
+	humanoid.Name = &quot;Humanoid&quot;
+	humanoid.RigType = Enum.HumanoidRigType.R15
+	humanoid.HipHeight = 2.0
+	humanoid.MaxHealth = 100
+	humanoid.Health = 100
+	humanoid.BreakJointsOnDeath = false
+	humanoid.Parent = dummy
+
+	local skinColor = Color3.fromRGB(230, 225, 215) -- Project C.A.R.L. mannequin tone
+
+	-- HumanoidRootPart
+	local hrp = createPart(&quot;HumanoidRootPart&quot;, Vector3.new(2, 2, 1), skinColor, dummy)
+	hrp.Transparency = 1
+	hrp.CanCollide = false
+	hrp.CFrame = spawnCFrame
+	dummy.PrimaryPart = hrp
+
+	-- LowerTorso &amp; UpperTorso
+	local lowerTorso = createPart(&quot;LowerTorso&quot;, Vector3.new(2, 0.8, 1), skinColor, dummy)
+	lowerTorso.CFrame = spawnCFrame * CFrame.new(0, -0.6, 0)
+
+	local upperTorso = createPart(&quot;UpperTorso&quot;, Vector3.new(2, 1.6, 1), skinColor, dummy)
+	upperTorso.CFrame = spawnCFrame * CFrame.new(0, 0.6, 0)
+
+	-- Head
+	local head = createPart(&quot;Head&quot;, Vector3.new(1.2, 1.2, 1.2), skinColor, dummy)
+	head.CFrame = spawnCFrame * CFrame.new(0, 2.0, 0)
+	local headMesh = Instance.new(&quot;SpecialMesh&quot;)
+	headMesh.MeshType = Enum.MeshType.Head
+	headMesh.Scale = Vector3.new(1.25, 1.25, 1.25)
+	headMesh.Parent = head
+
+	-- C.A.R.L. Visor / Markings (Dark line across face)
+	local visorDecal = Instance.new(&quot;Decal&quot;)
+	visorDecal.Name = &quot;FaceMark&quot;
+	visorDecal.Face = Enum.NormalId.Front
+	visorDecal.Texture = &quot;rbxassetid://1212882264&quot;
+	visorDecal.Parent = head
+
+	-- Limbs
+	local lUpperArm = createPart(&quot;LeftUpperArm&quot;, Vector3.new(0.8, 1.1, 0.8), skinColor, dummy)
+	local lLowerArm = createPart(&quot;LeftLowerArm&quot;, Vector3.new(0.8, 1.1, 0.8), skinColor, dummy)
+	local lHand = createPart(&quot;LeftHand&quot;, Vector3.new(0.8, 0.4, 0.8), skinColor, dummy)
+
+	local rUpperArm = createPart(&quot;RightUpperArm&quot;, Vector3.new(0.8, 1.1, 0.8), skinColor, dummy)
+	local rLowerArm = createPart(&quot;RightLowerArm&quot;, Vector3.new(0.8, 1.1, 0.8), skinColor, dummy)
+	local rHand = createPart(&quot;RightHand&quot;, Vector3.new(0.8, 0.4, 0.8), skinColor, dummy)
+
+	local lUpperLeg = createPart(&quot;LeftUpperLeg&quot;, Vector3.new(0.8, 1.2, 0.8), skinColor, dummy)
+	local lLowerLeg = createPart(&quot;LeftLowerLeg&quot;, Vector3.new(0.8, 1.2, 0.8), skinColor, dummy)
+	local lFoot = createPart(&quot;LeftFoot&quot;, Vector3.new(0.8, 0.4, 0.8), skinColor, dummy)
+
+	local rUpperLeg = createPart(&quot;RightUpperLeg&quot;, Vector3.new(0.8, 1.2, 0.8), skinColor, dummy)
+	local rLowerLeg = createPart(&quot;RightLowerLeg&quot;, Vector3.new(0.8, 1.2, 0.8), skinColor, dummy)
+	local rFoot = createPart(&quot;RightFoot&quot;, Vector3.new(0.8, 0.4, 0.8), skinColor, dummy)
+
+	-- Motor6D Joints
+	createMotor(&quot;Root&quot;, hrp, lowerTorso, CFrame.new(0, 0, 0), CFrame.new(0, 0, 0), lowerTorso)
+	createMotor(&quot;Waist&quot;, lowerTorso, upperTorso, CFrame.new(0, 0.4, 0), CFrame.new(0, -0.8, 0), upperTorso)
+	createMotor(&quot;Neck&quot;, upperTorso, head, CFrame.new(0, 0.8, 0), CFrame.new(0, -0.6, 0), head)
+
+	-- Left Arm
+	createMotor(&quot;LeftShoulder&quot;, upperTorso, lUpperArm, CFrame.new(-1.3, 0.6, 0), CFrame.new(0, 0.55, 0), lUpperArm)
+	createMotor(&quot;LeftElbow&quot;, lUpperArm, lLowerArm, CFrame.new(0, -0.55, 0), CFrame.new(0, 0.55, 0), lLowerArm)
+	createMotor(&quot;LeftWrist&quot;, lLowerArm, lHand, CFrame.new(0, -0.55, 0), CFrame.new(0, 0.2, 0), lHand)
+
+	-- Right Arm
+	createMotor(&quot;RightShoulder&quot;, upperTorso, rUpperArm, CFrame.new(1.3, 0.6, 0), CFrame.new(0, 0.55, 0), rUpperArm)
+	createMotor(&quot;RightElbow&quot;, rUpperArm, rLowerArm, CFrame.new(0, -0.55, 0), CFrame.new(0, 0.55, 0), rLowerArm)
+	createMotor(&quot;RightWrist&quot;, rLowerArm, rHand, CFrame.new(0, -0.55, 0), CFrame.new(0, 0.2, 0), rHand)
+
+	-- Left Leg
+	createMotor(&quot;LeftHip&quot;, lowerTorso, lUpperLeg, CFrame.new(-0.5, -0.4, 0), CFrame.new(0, 0.6, 0), lUpperLeg)
+	createMotor(&quot;LeftKnee&quot;, lUpperLeg, lLowerLeg, CFrame.new(0, -0.6, 0), CFrame.new(0, 0.6, 0), lLowerLeg)
+	createMotor(&quot;LeftAnkle&quot;, lLowerLeg, lFoot, CFrame.new(0, -0.6, 0), CFrame.new(0, 0.2, 0), lFoot)
+
+	-- Right Leg
+	createMotor(&quot;RightHip&quot;, lowerTorso, rUpperLeg, CFrame.new(0.5, -0.4, 0), CFrame.new(0, 0.6, 0), rUpperLeg)
+	createMotor(&quot;RightKnee&quot;, rUpperLeg, rLowerLeg, CFrame.new(0, -0.6, 0), CFrame.new(0, 0.6, 0), rLowerLeg)
+	createMotor(&quot;RightAnkle&quot;, rLowerLeg, rFoot, CFrame.new(0, -0.6, 0), CFrame.new(0, 0.2, 0), rFoot)
+
+	----------------------------------------------------------------------
+	-- PROJECT C.A.R.L. INTERNAL ANATOMICAL ORGANS
+	----------------------------------------------------------------------
+	local function createOrgan(organName: string, size: Vector3, color: Color3, parentLimb: BasePart, offset: Vector3): Part
+		local organ = Instance.new(&quot;Part&quot;)
+		organ.Name = organName
+		organ.Size = size
+		organ.Color = color
+		organ.Material = Enum.Material.Neon
+		organ.CanCollide = false
+		organ.Transparency = 0.8 -- translucent by default, becomes visible in X-Ray!
+		organ:SetAttribute(&quot;IsOrgan&quot;, true)
+		organ.CFrame = parentLimb.CFrame * CFrame.new(offset)
+		organ.Parent = dummy
+
+		local weld = Instance.new(&quot;WeldConstraint&quot;)
+		weld.Part0 = parentLimb
+		weld.Part1 = organ
+		weld.Parent = organ
+
+		return organ
+	end
+
+	-- Brain inside Head
+	createOrgan(&quot;Brain&quot;, Vector3.new(0.7, 0.6, 0.7), Color3.fromRGB(220, 80, 100), head, Vector3.new(0, 0.1, 0))
+
+	-- Heart inside UpperTorso
+	createOrgan(&quot;Heart&quot;, Vector3.new(0.5, 0.5, 0.4), Color3.fromRGB(180, 10, 20), upperTorso, Vector3.new(-0.25, 0.1, -0.1))
+
+	-- Lungs
+	createOrgan(&quot;LeftLung&quot;, Vector3.new(0.4, 0.8, 0.4), Color3.fromRGB(200, 110, 130), upperTorso, Vector3.new(-0.45, 0.2, 0))
+	createOrgan(&quot;RightLung&quot;, Vector3.new(0.4, 0.8, 0.4), Color3.fromRGB(200, 110, 130), upperTorso, Vector3.new(0.45, 0.2, 0))
+
+	-- Spine running through Torso
+	createOrgan(&quot;Spine&quot;, Vector3.new(0.3, 1.4, 0.3), Color3.fromRGB(240, 240, 240), upperTorso, Vector3.new(0, 0, 0.25))
+
+	-- Stomach
+	createOrgan(&quot;Stomach&quot;, Vector3.new(0.6, 0.5, 0.5), Color3.fromRGB(160, 60, 60), lowerTorso, Vector3.new(0, 0, -0.1))
+
+	----------------------------------------------------------------------
+	-- OVERHEAD BILLBOARD GUI (STATUS &amp; ANATOMY INFO)
+	----------------------------------------------------------------------
+	local bb = Instance.new(&quot;BillboardGui&quot;)
+	bb.Name = &quot;StatusGui&quot;
+	bb.Size = UDim2.new(5, 0, 1.8, 0)
+	bb.StudsOffset = Vector3.new(0, 2.5, 0)
+	bb.AlwaysOnTop = true
+	bb.Adornee = head
+	bb.Parent = head
+
+	local frame = Instance.new(&quot;Frame&quot;)
+	frame.Size = UDim2.new(1, 0, 1, 0)
+	frame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+	frame.BackgroundTransparency = 0.3
+	frame.BorderSizePixel = 0
+	frame.Parent = bb
+
+	local uicorner = Instance.new(&quot;UICorner&quot;)
+	uicorner.CornerRadius = UDim.new(0, 6)
+	uicorner.Parent = frame
+
+	local titleLabel = Instance.new(&quot;TextLabel&quot;)
+	titleLabel.Name = &quot;Title&quot;
+	titleLabel.Size = UDim2.new(1, 0, 0.35, 0)
+	titleLabel.BackgroundTransparency = 1
+	titleLabel.Text = dummy.Name
+	titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	titleLabel.Font = Enum.Font.GothamBold
+	titleLabel.TextScaled = true
+	titleLabel.Parent = frame
+
+	local hpLabel = Instance.new(&quot;TextLabel&quot;)
+	hpLabel.Name = &quot;HpLabel&quot;
+	hpLabel.Size = UDim2.new(1, 0, 0.3, 0)
+	hpLabel.Position = UDim2.new(0, 0, 0.35, 0)
+	hpLabel.BackgroundTransparency = 1
+	hpLabel.Text = &quot;HP: 100/100 | СТАТУС: В НОРМЕ&quot;
+	hpLabel.TextColor3 = Color3.fromRGB(100, 255, 120)
+	hpLabel.Font = Enum.Font.GothamMedium
+	hpLabel.TextScaled = true
+	hpLabel.Parent = frame
+
+	local ragdollLabel = Instance.new(&quot;TextLabel&quot;)
+	ragdollLabel.Name = &quot;RagdollLabel&quot;
+	ragdollLabel.Size = UDim2.new(1, 0, 0.3, 0)
+	ragdollLabel.Position = UDim2.new(0, 0, 0.68, 0)
+	ragdollLabel.BackgroundTransparency = 1
+	ragdollLabel.Text = &quot;[F/E: РЭГДОЛЛ] [R: ВОССТАНОВИТЬ]&quot;
+	ragdollLabel.TextColor3 = Color3.fromRGB(255, 200, 80)
+	ragdollLabel.Font = Enum.Font.Gotham
+	ragdollLabel.TextScaled = true
+	ragdollLabel.Parent = frame
+
+	-- Update status GUI on health change or ragdoll toggle
+	local function updateGui()
+		if humanoid.Health &lt;= 0 then
+			hpLabel.Text = &quot;☠️ МЕРТВ (ПОЛНЫЙ РЭГДОЛЛ)&quot;
+			hpLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+		else
+			local isRag = RagdollModule.IsRagdolled(dummy)
+			hpLabel.Text = string.format(&quot;HP: %d/100 | %s&quot;, math.floor(humanoid.Health), isRag and &quot;🌀 РЭГДОЛЛ&quot; or &quot;🧍 СТОИТ&quot;)
+			hpLabel.TextColor3 = isRag and Color3.fromRGB(255, 140, 50) or Color3.fromRGB(100, 255, 120)
+		end
+	end
+
+	humanoid.HealthChanged:Connect(updateGui)
+	local isRagVal = dummy:FindFirstChild(&quot;IsRagdolled&quot;) :: BoolValue?
+	if isRagVal then
+		isRagVal.Changed:Connect(updateGui)
+	end
+
+	----------------------------------------------------------------------
+	-- PROXIMITY PROMPTS FOR INTERACTION
+	----------------------------------------------------------------------
+	-- [E] Toggle Ragdoll
+	local togglePrompt = Instance.new(&quot;ProximityPrompt&quot;)
+	togglePrompt.Name = &quot;ToggleRagdollPrompt&quot;
+	togglePrompt.ActionText = &quot;Переключить рэгдолл&quot;
+	togglePrompt.ObjectText = dummy.Name
+	togglePrompt.KeyboardKeyCode = Enum.KeyCode.E
+	togglePrompt.HoldDuration = 0
+	togglePrompt.MaxActivationDistance = 12
+	togglePrompt.RequiresLineOfSight = false
+	togglePrompt.Parent = upperTorso
+
+	togglePrompt.Triggered:Connect(function(player)
+		RagdollModule.ToggleRagdoll(dummy)
+		updateGui()
+	end)
+
+	-- [R] Revive / Reset Dummy
+	local resetPrompt = Instance.new(&quot;ProximityPrompt&quot;)
+	resetPrompt.Name = &quot;ResetDummyPrompt&quot;
+	resetPrompt.ActionText = &quot;Восстановить / Оживить&quot;
+	resetPrompt.ObjectText = dummy.Name
+	resetPrompt.KeyboardKeyCode = Enum.KeyCode.R
+	resetPrompt.HoldDuration = 0.5
+	resetPrompt.MaxActivationDistance = 12
+	resetPrompt.RequiresLineOfSight = false
+	resetPrompt.Parent = upperTorso
+
+	resetPrompt.Triggered:Connect(function(player)
+		humanoid.Health = humanoid.MaxHealth
+		RagdollModule.SetRagdoll(dummy, false)
+		hrp.CFrame = spawnCFrame
+		hrp.AssemblyLinearVelocity = Vector3.zero
+		hrp.AssemblyAngularVelocity = Vector3.zero
+		updateGui()
+	end)
+
+	-- Set up ragdoll physics constraints
+	RagdollModule.SetupCharacter(dummy)
+
+	dummy.Parent = Workspace
+	return dummy
+end
+
+-- Initialize default dummies in testing arena
+task.spawn(function()
+	task.wait(1)
+
+	-- 1. Main C.A.R.L. Anatomy Dummy on the shooting range pedestal
+	DummyManager.CreateCarlDummy(CFrame.new(0, 5, -25), &quot;C.A.R.L. (Лабораторный Манекен)&quot;)
+
+	-- 2. Dummy at the top of Stunt Stairs (ready to tumble down!)
+	DummyManager.CreateCarlDummy(CFrame.new(35, 34, -15), &quot;Манекен (Вершина Лестницы)&quot;)
+
+	-- 3. Dummy at the top of Mega Ramp
+	DummyManager.CreateCarlDummy(CFrame.new(-35, 28, -15), &quot;Манекен (Вершина Горки)&quot;)
+end)
+
+return DummyManager
+</string>
+      </Properties>
+    </Item>
+    <Item class="Script" referent="RBX_20">
+      <Properties>
+        <string name="Name">MapBuilder</string>
+        <string name="Source">--!strict
+-- MapBuilder.server.luau
+-- Builds the Ragdoll &amp; Ballistics Testing Laboratory (Stunt Stairs, Mega Ramp, Trampoline, Kinetic Spinner)
+
+local Workspace = game:GetService(&quot;Workspace&quot;)
+local TweenService = game:GetService(&quot;TweenService&quot;)
+
+local MapBuilder = {}
+
+local function createPart(name: string, size: Vector3, position: Vector3, color: Color3, material: Enum.Material?, parent: Instance): Part
+	local part = Instance.new(&quot;Part&quot;)
+	part.Name = name
+	part.Size = size
+	part.Position = position
+	part.Anchored = true
+	part.CanCollide = true
+	part.Color = color
+	part.Material = material or Enum.Material.SmoothPlastic
+	part.TopSurface = Enum.SurfaceType.Smooth
+	part.BottomSurface = Enum.SurfaceType.Smooth
+	part.Parent = parent
+	return part
+end
+
+function MapBuilder.BuildLab()
+	local mapFolder = Workspace:FindFirstChild(&quot;RagdollLabMap&quot;)
+	if mapFolder then
+		return -- Map already built
+	end
+
+	mapFolder = Instance.new(&quot;Folder&quot;)
+	mapFolder.Name = &quot;RagdollLabMap&quot;
+	mapFolder.Parent = Workspace
+
+	----------------------------------------------------------------------
+	-- 1. BASEPLATE &amp; MAIN ARENA FLOOR
+	----------------------------------------------------------------------
+	local baseplate = createPart(&quot;LabFloor&quot;, Vector3.new(512, 10, 512), Vector3.new(0, -5, 0), Color3.fromRGB(28, 30, 36), Enum.Material.Concrete, mapFolder)
+
+	-- Grid texture on floor
+	local texture = Instance.new(&quot;Texture&quot;)
+	texture.Texture = &quot;rbxassetid://6372755229&quot; -- Grid texture
+	texture.Face = Enum.NormalId.Top
+	texture.StudsPerTileU = 8
+	texture.StudsPerTileV = 8
+	texture.Transparency = 0.6
+	texture.Parent = baseplate
+
+	----------------------------------------------------------------------
+	-- 2. SPAWN PLATFORM
+	----------------------------------------------------------------------
+	local spawnLoc = Instance.new(&quot;SpawnLocation&quot;)
+	spawnLoc.Name = &quot;LabSpawn&quot;
+	spawnLoc.Size = Vector3.new(16, 1, 16)
+	spawnLoc.Position = Vector3.new(0, 0.5, 15)
+	spawnLoc.Anchored = true
+	spawnLoc.CanCollide = true
+	spawnLoc.Color = Color3.fromRGB(45, 50, 60)
+	spawnLoc.Material = Enum.Material.SmoothPlastic
+	spawnLoc.Duration = 0
+	spawnLoc.Parent = mapFolder
+
+	local spawnDecal = Instance.new(&quot;Decal&quot;)
+	spawnDecal.Face = Enum.NormalId.Top
+	spawnDecal.Texture = &quot;rbxassetid://1212882264&quot;
+	spawnDecal.Parent = spawnLoc
+
+	-- Neon border for spawn
+	createPart(&quot;SpawnBorder&quot;, Vector3.new(16.4, 0.4, 16.4), Vector3.new(0, 0.3, 15), Color3.fromRGB(0, 180, 255), Enum.Material.Neon, mapFolder)
+
+	----------------------------------------------------------------------
+	-- 3. THE STUNT STAIRS (30 STEPS TALL)
+	----------------------------------------------------------------------
+	local stairsFolder = Instance.new(&quot;Folder&quot;)
+	stairsFolder.Name = &quot;StuntStairs&quot;
+	stairsFolder.Parent = mapFolder
+
+	local startX = 35
+	local startZ = 15
+	local stepWidth = 12
+	local stepDepth = 2.2
+	local stepHeight = 1.05
+	local numSteps = 30
+
+	for i = 1, numSteps do
+		local y = i * stepHeight
+		local z = startZ - (i * stepDepth)
+		local stepColor = (i % 2 == 0) and Color3.fromRGB(50, 55, 65) or Color3.fromRGB(40, 44, 52)
+		local step = createPart(&quot;Step_&quot; .. i, Vector3.new(stepWidth, stepHeight, stepDepth), Vector3.new(startX, y - (stepHeight / 2), z), stepColor, Enum.Material.Metal, stairsFolder)
+
+		-- Yellow warning stripes on step edge
+		if i % 5 == 0 then
+			createPart(&quot;StairStripe_&quot; .. i, Vector3.new(stepWidth, 0.1, 0.4), Vector3.new(startX, y + 0.05, z + (stepDepth / 2) - 0.2), Color3.fromRGB(240, 180, 20), Enum.Material.Neon, stairsFolder)
+		end
+	end
+
+	-- Top Observation Platform
+	local topPlatform = createPart(&quot;StairsTopPlatform&quot;, Vector3.new(16, 2, 14), Vector3.new(startX, numSteps * stepHeight - 1, startZ - (numSteps * stepDepth) - 7), Color3.fromRGB(35, 40, 48), Enum.Material.Metal, stairsFolder)
+
+	-- Platform railing with open tumble exit facing stairs
+	createPart(&quot;RailBack&quot;, Vector3.new(16, 4, 1), topPlatform.Position + Vector3.new(0, 3, -7), Color3.fromRGB(200, 200, 200), Enum.Material.SmoothPlastic, stairsFolder)
+	createPart(&quot;RailLeft&quot;, Vector3.new(1, 4, 14), topPlatform.Position + Vector3.new(-8, 3, 0), Color3.fromRGB(200, 200, 200), Enum.Material.SmoothPlastic, stairsFolder)
+	createPart(&quot;RailRight&quot;, Vector3.new(1, 4, 14), topPlatform.Position + Vector3.new(8, 3, 0), Color3.fromRGB(200, 200, 200), Enum.Material.SmoothPlastic, stairsFolder)
+
+	----------------------------------------------------------------------
+	-- 4. THE MEGA SLIDE / RAMP
+	----------------------------------------------------------------------
+	local rampFolder = Instance.new(&quot;Folder&quot;)
+	rampFolder.Name = &quot;MegaRamp&quot;
+	rampFolder.Parent = mapFolder
+
+	local rampX = -35
+	local rampTopPos = Vector3.new(rampX, 26, -20)
+	local rampBottomPos = Vector3.new(rampX, 1, 15)
+
+	-- Slide surface (Angled WedgePart)
+	local rampWedge = Instance.new(&quot;WedgePart&quot;)
+	rampWedge.Name = &quot;SlideWedge&quot;
+	rampWedge.Size = Vector3.new(14, 26, 40)
+	rampWedge.CFrame = CFrame.new(rampX, 13, -2.5) * CFrame.Angles(0, math.pi, 0)
+	rampWedge.Anchored = true
+	rampWedge.Color = Color3.fromRGB(0, 120, 215)
+	rampWedge.Material = Enum.Material.Ice -- Super slippery for maximum ragdoll sliding!
+	rampWedge.Parent = rampFolder
+
+	-- Top staging platform for ramp
+	createPart(&quot;RampTopPlatform&quot;, Vector3.new(16, 2, 12), rampTopPos + Vector3.new(0, -1, -8), Color3.fromRGB(40, 45, 55), Enum.Material.Metal, rampFolder)
+
+	-- Jump kicker at bottom of slide
+	local kicker = Instance.new(&quot;WedgePart&quot;)
+	kicker.Name = &quot;SlideKicker&quot;
+	kicker.Size = Vector3.new(14, 3, 6)
+	kicker.CFrame = CFrame.new(rampX, 1.5, 20)
+	kicker.Anchored = true
+	kicker.Color = Color3.fromRGB(255, 140, 0)
+	kicker.Material = Enum.Material.SmoothPlastic
+	kicker.Parent = rampFolder
+
+	----------------------------------------------------------------------
+	-- 5. SUPER TRAMPOLINE / LAUNCHPAD
+	----------------------------------------------------------------------
+	local trampoline = createPart(&quot;SuperTrampoline&quot;, Vector3.new(18, 1.2, 18), Vector3.new(0, 0.6, -55), Color3.fromRGB(0, 255, 180), Enum.Material.Neon, mapFolder)
+
+	local bounceCooldown = false
+	trampoline.Touched:Connect(function(hit)
+		if bounceCooldown then return end
+		local char = hit:FindFirstAncestorOfClass(&quot;Model&quot;)
+		if char and char:FindFirstChildOfClass(&quot;Humanoid&quot;) then
+			bounceCooldown = true
+			task.delay(0.25, function() bounceCooldown = false end)
+
+			local hrp = char:FindFirstChild(&quot;HumanoidRootPart&quot;) or hit
+			if hrp and hrp:IsA(&quot;BasePart&quot;) then
+				-- Fling into air with huge upward velocity!
+				hrp.AssemblyLinearVelocity = Vector3.new(math.random(-10, 10), 95, math.random(-25, -10))
+
+				-- Create flash effect
+				local flash = Instance.new(&quot;PointLight&quot;)
+				flash.Color = Color3.fromRGB(0, 255, 200)
+				flash.Range = 25
+				flash.Brightness = 10
+				flash.Parent = trampoline
+				TweenService:Create(flash, TweenInfo.new(0.5), { Brightness = 0 }):Play()
+				game:GetService(&quot;Debris&quot;):AddItem(flash, 0.6)
+			end
+		end
+	end)
+
+	-- Trampoline Frame
+	createPart(&quot;TrampolineBorder&quot;, Vector3.new(20, 1.5, 20), Vector3.new(0, 0.5, -55), Color3.fromRGB(20, 25, 30), Enum.Material.Metal, mapFolder)
+
+	----------------------------------------------------------------------
+	-- 6. KINETIC SWEEPER / SPINNER (KNOCKS PLAYERS &amp; DUMMIES OVER)
+	----------------------------------------------------------------------
+	local spinnerFolder = Instance.new(&quot;Folder&quot;)
+	spinnerFolder.Name = &quot;KineticSpinner&quot;
+	spinnerFolder.Parent = mapFolder
+
+	local spinnerCenter = Vector3.new(0, 1, -100)
+
+	-- Spinner circular ring arena
+	createPart(&quot;SpinnerArena&quot;, Vector3.new(45, 1, 45), spinnerCenter, Color3.fromRGB(35, 38, 45), Enum.Material.Concrete, spinnerFolder)
+
+	-- Rotating Pillar
+	local post = createPart(&quot;SpinnerPost&quot;, Vector3.new(3, 4, 3), spinnerCenter + Vector3.new(0, 2, 0), Color3.fromRGB(180, 30, 30), Enum.Material.Metal, spinnerFolder)
+
+	-- Rotating Bar
+	local bar = Instance.new(&quot;Part&quot;)
+	bar.Name = &quot;SweeperBar&quot;
+	bar.Size = Vector3.new(38, 1.8, 1.8)
+	bar.Position = spinnerCenter + Vector3.new(0, 2, 0)
+	bar.Anchored = true
+	bar.CanCollide = true
+	bar.Color = Color3.fromRGB(255, 200, 30)
+	bar.Material = Enum.Material.Neon
+	bar.Parent = spinnerFolder
+
+	-- Rotate continuously
+	task.spawn(function()
+		local angle = 0
+		while bar and bar.Parent do
+			angle = (angle + 1.8) % 360
+			bar.CFrame = CFrame.new(spinnerCenter + Vector3.new(0, 2, 0)) * CFrame.Angles(0, math.rad(angle), 0)
+			task.wait(0.03)
+		end
+	end)
+
+	----------------------------------------------------------------------
+	-- 7. SHOOTING RANGE BENCH &amp; TARGET MARKERS
+	----------------------------------------------------------------------
+	local shootingFolder = Instance.new(&quot;Folder&quot;)
+	shootingFolder.Name = &quot;ShootingRange&quot;
+	shootingFolder.Parent = mapFolder
+
+	-- Pedestal for C.A.R.L. Dummy
+	createPart(&quot;CarlPedestal&quot;, Vector3.new(8, 1, 8), Vector3.new(0, 0.5, -25), Color3.fromRGB(50, 55, 65), Enum.Material.Metal, shootingFolder)
+	createPart(&quot;PedestalGlow&quot;, Vector3.new(8.4, 0.2, 8.4), Vector3.new(0, 0.2, -25), Color3.fromRGB(255, 60, 60), Enum.Material.Neon, shootingFolder)
+
+	-- Shooting stall counter / bench
+	createPart(&quot;FiringBench&quot;, Vector3.new(16, 3, 3), Vector3.new(0, 1.5, -5), Color3.fromRGB(40, 45, 52), Enum.Material.WoodPlanks, shootingFolder)
+
+	print(&quot;[Server] Ragdoll Testing Lab Map generated.&quot;)
+end
+
+-- Generate map on server start
+MapBuilder.BuildLab()
+
+return MapBuilder
+</string>
+      </Properties>
+    </Item>
+  </Item>
+  <Item class="StarterPlayer" referent="RBX_21">
+    <Properties>
+      <string name="Name">StarterPlayer</string>
+    </Properties>
+    <Item class="StarterPlayerScripts" referent="RBX_22">
+      <Properties>
+        <string name="Name">StarterPlayerScripts</string>
+      </Properties>
+      <Item class="LocalScript" referent="RBX_23">
+        <Properties>
+          <string name="Name">RagdollController</string>
+          <string name="Source">--!strict
+-- RagdollController.client.luau
+-- Handles player input for [F] Ragdoll Toggle, [X] X-Ray Mode, and Camera Tracking
+
+local UserInputService = game:GetService(&quot;UserInputService&quot;)
+local ReplicatedStorage = game:GetService(&quot;ReplicatedStorage&quot;)
+local Players = game:GetService(&quot;Players&quot;)
+local Workspace = game:GetService(&quot;Workspace&quot;)
+
+local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
+
+local ToggleRagdollRemote = ReplicatedStorage:WaitForChild(&quot;ToggleRagdoll&quot;) :: RemoteEvent
+local ToggleXRayRemote = ReplicatedStorage:WaitForChild(&quot;ToggleXRay&quot;) :: RemoteEvent
+
+local debounce = false
+
+-- Function to request ragdoll toggle
+local function requestRagdollToggle()
+	if debounce then return end
+	debounce = true
+	task.delay(0.35, function()
+		debounce = false
+	end)
+
+	ToggleRagdollRemote:FireServer()
+end
+
+-- Listen for keyboard inputs
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+
+	-- [F] Key: Toggle Ragdoll for self
+	if input.KeyCode == Enum.KeyCode.F then
+		requestRagdollToggle()
+	end
+
+	-- [X] Key: Toggle X-Ray Organ View on Dummies
+	if input.KeyCode == Enum.KeyCode.X then
+		ToggleXRayRemote:FireServer()
+	end
+end)
+
+-- Bind custom event for UI clicks
+local BindableToggle = Instance.new(&quot;BindableEvent&quot;)
+BindableToggle.Name = &quot;ClientToggleRagdoll&quot;
+BindableToggle.Parent = script
+
+BindableToggle.Event:Connect(function()
+	requestRagdollToggle()
+end)
+
+print(&quot;[Client] RagdollController loaded. Press [F] to Ragdoll!&quot;)
+</string>
+        </Properties>
+      </Item>
+      <Item class="LocalScript" referent="RBX_24">
+        <Properties>
+          <string name="Name">RagdollHud</string>
+          <string name="Source">--!strict
+-- RagdollHud.client.luau
+-- Displays controls helper, ragdoll status badge, X-Ray toggle button, and Project C.A.R.L. organ hit notifications
+
+local Players = game:GetService(&quot;Players&quot;)
+local ReplicatedStorage = game:GetService(&quot;ReplicatedStorage&quot;)
+local TweenService = game:GetService(&quot;TweenService&quot;)
+
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild(&quot;PlayerGui&quot;)
+
+local OrganHitRemote = ReplicatedStorage:WaitForChild(&quot;OrganHitEvent&quot;) :: RemoteEvent
+local ToggleRagdollRemote = ReplicatedStorage:WaitForChild(&quot;ToggleRagdoll&quot;) :: RemoteEvent
+local ToggleXRayRemote = ReplicatedStorage:WaitForChild(&quot;ToggleXRay&quot;) :: RemoteEvent
+
+-- Create ScreenGui
+local screenGui = Instance.new(&quot;ScreenGui&quot;)
+screenGui.Name = &quot;RagdollHudGui&quot;
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.Parent = PlayerGui
+
+----------------------------------------------------------------------
+-- TOP TITLE BANNER
+----------------------------------------------------------------------
+local topBanner = Instance.new(&quot;Frame&quot;)
+topBanner.Name = &quot;TopBanner&quot;
+topBanner.Size = UDim2.new(0, 480, 0, 42)
+topBanner.Position = UDim2.new(0.5, -240, 0, 12)
+topBanner.BackgroundColor3 = Color3.fromRGB(18, 20, 24)
+topBanner.BackgroundTransparency = 0.25
+topBanner.BorderSizePixel = 0
+topBanner.Parent = screenGui
+
+local bannerCorner = Instance.new(&quot;UICorner&quot;)
+bannerCorner.CornerRadius = UDim.new(0, 8)
+bannerCorner.Parent = topBanner
+
+local bannerStroke = Instance.new(&quot;UIStroke&quot;)
+bannerStroke.Color = Color3.fromRGB(0, 180, 255)
+bannerStroke.Thickness = 1.5
+bannerStroke.Transparency = 0.4
+bannerStroke.Parent = topBanner
+
+local titleText = Instance.new(&quot;TextLabel&quot;)
+titleText.Size = UDim2.new(1, 0, 1, 0)
+titleText.BackgroundTransparency = 1
+titleText.Text = &quot;PROJECT C.A.R.L. // ROBLOX RAGDOLL ENGINE&quot;
+titleText.TextColor3 = Color3.fromRGB(240, 245, 255)
+titleText.Font = Enum.Font.GothamBold
+titleText.TextSize = 16
+titleText.Parent = topBanner
+
+----------------------------------------------------------------------
+-- CONTROLS &amp; STATUS CARD (LEFT SIDE)
+----------------------------------------------------------------------
+local card = Instance.new(&quot;Frame&quot;)
+card.Name = &quot;ControlsCard&quot;
+card.Size = UDim2.new(0, 290, 0, 210)
+card.Position = UDim2.new(0, 16, 0.5, -105)
+card.BackgroundColor3 = Color3.fromRGB(20, 22, 28)
+card.BackgroundTransparency = 0.2
+card.BorderSizePixel = 0
+card.Parent = screenGui
+
+local cardCorner = Instance.new(&quot;UICorner&quot;)
+cardCorner.CornerRadius = UDim.new(0, 8)
+cardCorner.Parent = card
+
+local cardStroke = Instance.new(&quot;UIStroke&quot;)
+cardStroke.Color = Color3.fromRGB(80, 90, 110)
+cardStroke.Thickness = 1
+cardStroke.Transparency = 0.5
+cardStroke.Parent = card
+
+local cardTitle = Instance.new(&quot;TextLabel&quot;)
+cardTitle.Size = UDim2.new(1, -20, 0, 26)
+cardTitle.Position = UDim2.new(0, 10, 0, 8)
+cardTitle.BackgroundTransparency = 1
+cardTitle.Text = &quot;⚙️ УПРАВЛЕНИЕ И СТАТУС&quot;
+cardTitle.TextColor3 = Color3.fromRGB(0, 200, 255)
+cardTitle.Font = Enum.Font.GothamBold
+cardTitle.TextSize = 14
+cardTitle.TextXAlignment = Enum.TextXAlignment.Left
+cardTitle.Parent = card
+
+-- [F] Ragdoll Button
+local fButton = Instance.new(&quot;TextButton&quot;)
+fButton.Name = &quot;RagdollButton&quot;
+fButton.Size = UDim2.new(1, -20, 0, 36)
+fButton.Position = UDim2.new(0, 10, 0, 38)
+fButton.BackgroundColor3 = Color3.fromRGB(35, 40, 50)
+fButton.BorderSizePixel = 0
+fButton.Text = &quot;🌀 [F] ТВОЙ РЭГДОЛЛ: ВЫКЛ&quot;
+fButton.TextColor3 = Color3.fromRGB(100, 255, 120)
+fButton.Font = Enum.Font.GothamBold
+fButton.TextSize = 13
+fButton.Parent = card
+
+local fCorner = Instance.new(&quot;UICorner&quot;)
+fCorner.CornerRadius = UDim.new(0, 6)
+fCorner.Parent = fButton
+
+fButton.MouseButton1Click:Connect(function()
+	ToggleRagdollRemote:FireServer()
+end)
+
+-- [X] X-Ray Button
+local xButton = Instance.new(&quot;TextButton&quot;)
+xButton.Name = &quot;XRayButton&quot;
+xButton.Size = UDim2.new(1, -20, 0, 32)
+xButton.Position = UDim2.new(0, 10, 0, 80)
+xButton.BackgroundColor3 = Color3.fromRGB(35, 40, 50)
+xButton.BorderSizePixel = 0
+xButton.Text = &quot;👁️ [X] РЕНТГЕН ОРГАНОВ C.A.R.L.&quot;
+xButton.TextColor3 = Color3.fromRGB(255, 200, 80)
+xButton.Font = Enum.Font.GothamBold
+xButton.TextSize = 12
+xButton.Parent = card
+
+local xCorner = Instance.new(&quot;UICorner&quot;)
+xCorner.CornerRadius = UDim.new(0, 6)
+xCorner.Parent = xButton
+
+xButton.MouseButton1Click:Connect(function()
+	ToggleXRayRemote:FireServer()
+end)
+
+-- Instruction list label
+local infoLabel = Instance.new(&quot;TextLabel&quot;)
+infoLabel.Size = UDim2.new(1, -20, 0, 80)
+infoLabel.Position = UDim2.new(0, 10, 0, 120)
+infoLabel.BackgroundTransparency = 1
+infoLabel.Text = &quot;• [F] — Включить / встать из рэгдолла\n• [E] на манекене — Уронить / поднять\n• [R] на манекене — Восстановить HP\n• [1, 2, 3] — Пистолет, Дробовик, Толчок&quot;
+infoLabel.TextColor3 = Color3.fromRGB(180, 190, 205)
+infoLabel.Font = Enum.Font.Gotham
+infoLabel.TextSize = 11
+infoLabel.TextXAlignment = Enum.TextXAlignment.Left
+infoLabel.TextYAlignment = Enum.TextYAlignment.Top
+infoLabel.Parent = card
+
+-- Monitor player ragdoll state to update button badge
+task.spawn(function()
+	while true do
+		local char = LocalPlayer.Character
+		if char then
+			local isRag = char:FindFirstChild(&quot;IsRagdolled&quot;) :: BoolValue?
+			if isRag and isRag.Value then
+				fButton.Text = &quot;🌀 [F] ТВОЙ РЭГДОЛЛ: АКТИВЕН&quot;
+				fButton.TextColor3 = Color3.fromRGB(255, 120, 50)
+				fButton.BackgroundColor3 = Color3.fromRGB(60, 25, 25)
+			else
+				fButton.Text = &quot;🧍 [F] ТВОЙ РЭГДОЛЛ: ВЫКЛ (СТОИТ)&quot;
+				fButton.TextColor3 = Color3.fromRGB(100, 255, 120)
+				fButton.BackgroundColor3 = Color3.fromRGB(30, 45, 35)
+			end
+		end
+		task.wait(0.2)
+	end
+end)
+
+----------------------------------------------------------------------
+-- CRITICAL ORGAN HIT POPUP NOTIFICATIONS (PROJECT C.A.R.L. STYLE)
+----------------------------------------------------------------------
+local toastContainer = Instance.new(&quot;Frame&quot;)
+toastContainer.Name = &quot;ToastContainer&quot;
+toastContainer.Size = UDim2.new(0, 400, 0, 200)
+toastContainer.Position = UDim2.new(0.5, -200, 0.2, 0)
+toastContainer.BackgroundTransparency = 1
+toastContainer.Parent = screenGui
+
+OrganHitRemote.OnClientEvent:Connect(function(organData)
+	local toast = Instance.new(&quot;Frame&quot;)
+	toast.Size = UDim2.new(1, 0, 0, 40)
+	toast.Position = UDim2.new(0, 0, 0, 0)
+	toast.BackgroundColor3 = Color3.fromRGB(25, 15, 15)
+	toast.BackgroundTransparency = 0.2
+	toast.BorderSizePixel = 0
+	toast.Parent = toastContainer
+
+	local toastCorner = Instance.new(&quot;UICorner&quot;)
+	toastCorner.CornerRadius = UDim.new(0, 6)
+	toastCorner.Parent = toast
+
+	local toastStroke = Instance.new(&quot;UIStroke&quot;)
+	toastStroke.Color = organData.color or Color3.fromRGB(255, 50, 50)
+	toastStroke.Thickness = 1.5
+	toastStroke.Parent = toast
+
+	local label = Instance.new(&quot;TextLabel&quot;)
+	label.Size = UDim2.new(1, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.Text = organData.message or &quot;КРИТИЧЕСКОЕ ПОПАДАНИЕ!&quot;
+	label.TextColor3 = organData.color or Color3.fromRGB(255, 255, 255)
+	label.Font = Enum.Font.GothamBlack
+	label.TextSize = 14
+	label.Parent = toast
+
+	-- Animate popup
+	toast.Position = UDim2.new(0, 0, 0, -20)
+	toast.BackgroundTransparency = 1
+	label.TextTransparency = 1
+
+	local popIn = TweenService:Create(toast, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+		Position = UDim2.new(0, 0, 0, 0),
+		BackgroundTransparency = 0.2,
+	})
+	local labelFade = TweenService:Create(label, TweenInfo.new(0.25), { TextTransparency = 0 })
+	popIn:Play()
+	labelFade:Play()
+
+	-- Fade out after 2.5 seconds
+	task.delay(2.5, function()
+		if toast and toast.Parent then
+			local fadeOut = TweenService:Create(toast, TweenInfo.new(0.4), {
+				Position = UDim2.new(0, 0, 0, -30),
+				BackgroundTransparency = 1,
+			})
+			TweenService:Create(label, TweenInfo.new(0.4), { TextTransparency = 1 }):Play()
+			fadeOut:Play()
+			fadeOut.Completed:Connect(function()
+				toast:Destroy()
+			end)
+		end
+	end)
+end)
+
+print(&quot;[Client] Ragdoll HUD loaded.&quot;)
+</string>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+  <Item class="StarterPack" referent="RBX_25">
+    <Properties>
+      <string name="Name">StarterPack</string>
+    </Properties>
+    <Item class="Tool" referent="RBX_26">
+      <Properties>
+        <string name="Name">Пистолет 9mm (Pistol)</string>
+        <bool name="RequiresHandle">true</bool>
+        <bool name="CanBeDropped">true</bool>
+      </Properties>
+      <Item class="Part" referent="RBX_27">
+        <Properties>
+          <string name="Name">Handle</string>
+          <Vector3 name="size">
+            <X>0.6</X>
+            <Y>0.8</Y>
+            <Z>1.4</Z>
+          </Vector3>
+          <Color3 name="Color">
+            <R>0.3</R>
+            <G>0.2</G>
+            <B>0.2</B>
+          </Color3>
+          <bool name="Anchored">false</bool>
+          <bool name="CanCollide">false</bool>
+        </Properties>
+        <Item class="Sound" referent="RBX_28">
+          <Properties>
+            <string name="Name">ActionSound</string>
+            <string name="SoundId">rbxassetid://131070686</string>
+            <float name="Volume">0.8</float>
+          </Properties>
+        </Item>
+      </Item>
+      <Item class="LocalScript" referent="RBX_29">
+        <Properties>
+          <string name="Name">ClientScript</string>
+          <string name="Source">--!strict
+-- GunClient.client.luau
+-- Ballistic raycast weapon with bullet tracer beams, muzzle flash, and sound
+
+local Tool = script.Parent :: Tool
+local Players = game:GetService(&quot;Players&quot;)
+local ReplicatedStorage = game:GetService(&quot;ReplicatedStorage&quot;)
+local Workspace = game:GetService(&quot;Workspace&quot;)
+local Debris = game:GetService(&quot;Debris&quot;)
+
+local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
+local ShootRemote = ReplicatedStorage:WaitForChild(&quot;ShootWeapon&quot;) :: RemoteEvent
+
+local cooldown = false
+
+-- Create visual bullet tracer beam
+local function createTracer(startPos: Vector3, endPos: Vector3)
+	local p0 = Instance.new(&quot;Part&quot;)
+	p0.Size = Vector3.new(0.1, 0.1, 0.1)
+	p0.Position = startPos
+	p0.Anchored = true
+	p0.CanCollide = false
+	p0.Transparency = 1
+	p0.Parent = Workspace
+
+	local p1 = Instance.new(&quot;Part&quot;)
+	p1.Size = Vector3.new(0.1, 0.1, 0.1)
+	p1.Position = endPos
+	p1.Anchored = true
+	p1.CanCollide = false
+	p1.Transparency = 1
+	p1.Parent = Workspace
+
+	local att0 = Instance.new(&quot;Attachment&quot;)
+	att0.Parent = p0
+	local att1 = Instance.new(&quot;Attachment&quot;)
+	att1.Parent = p1
+
+	local beam = Instance.new(&quot;Beam&quot;)
+	beam.Attachment0 = att0
+	beam.Attachment1 = att1
+	beam.Color = ColorSequence.new(Color3.fromRGB(255, 220, 100), Color3.fromRGB(255, 100, 30))
+	beam.Width0 = 0.15
+	beam.Width1 = 0.05
+	beam.Texture = &quot;rbxassetid://131070686&quot;
+	beam.TextureSpeed = 0
+	beam.FaceCamera = true
+	beam.Parent = p0
+
+	Debris:AddItem(p0, 0.12)
+	Debris:AddItem(p1, 0.12)
+end
+
+Tool.Activated:Connect(function()
+	if cooldown then return end
+	local character = LocalPlayer.Character
+	if not character then return end
+	local handle = Tool:FindFirstChild(&quot;Handle&quot;) :: BasePart?
+	if not handle then return end
+
+	cooldown = true
+	task.delay(0.2, function()
+		cooldown = false
+	end)
+
+	local mouse = LocalPlayer:GetMouse()
+	local targetPos = mouse.Hit.Position
+	local startPos = handle.Position
+	local direction = (targetPos - startPos).Unit
+
+	-- Muzzle flash sound
+	local sound = handle:FindFirstChildOfClass(&quot;Sound&quot;)
+	if sound then
+		sound:Play()
+	end
+
+	-- Visual tracer
+	local hitPos = startPos + direction * 250
+	local raycastParams = RaycastParams.new()
+	raycastParams.FilterDescendantsInstances = { character }
+	raycastParams.FilterType = RaycastFilterType.Exclude
+
+	local result = Workspace:Raycast(startPos, direction * 250, raycastParams)
+	if result then
+		hitPos = result.Position
+	end
+	createTracer(startPos, hitPos)
+
+	-- Fire authoritative server shoot event
+	ShootRemote:FireServer(&quot;Pistol&quot;, startPos, direction)
+end)
+</string>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Tool" referent="RBX_30">
+      <Properties>
+        <string name="Name">Дробовик 12G (Shotgun)</string>
+        <bool name="RequiresHandle">true</bool>
+        <bool name="CanBeDropped">true</bool>
+      </Properties>
+      <Item class="Part" referent="RBX_31">
+        <Properties>
+          <string name="Name">Handle</string>
+          <Vector3 name="size">
+            <X>0.6</X>
+            <Y>0.8</Y>
+            <Z>1.4</Z>
+          </Vector3>
+          <Color3 name="Color">
+            <R>0.2</R>
+            <G>0.2</G>
+            <B>0.2</B>
+          </Color3>
+          <bool name="Anchored">false</bool>
+          <bool name="CanCollide">false</bool>
+        </Properties>
+        <Item class="Sound" referent="RBX_32">
+          <Properties>
+            <string name="Name">ActionSound</string>
+            <string name="SoundId">rbxassetid://142494488</string>
+            <float name="Volume">0.8</float>
+          </Properties>
+        </Item>
+      </Item>
+      <Item class="LocalScript" referent="RBX_33">
+        <Properties>
+          <string name="Name">ClientScript</string>
+          <string name="Source">--!strict
+-- ShotgunClient.client.luau
+-- 8-pellet high spread shotgun with heavy kinetic blast impulse
+
+local Tool = script.Parent :: Tool
+local Players = game:GetService(&quot;Players&quot;)
+local ReplicatedStorage = game:GetService(&quot;ReplicatedStorage&quot;)
+local Workspace = game:GetService(&quot;Workspace&quot;)
+local Debris = game:GetService(&quot;Debris&quot;)
+
+local LocalPlayer = Players.LocalPlayer
+local ShootRemote = ReplicatedStorage:WaitForChild(&quot;ShootWeapon&quot;) :: RemoteEvent
+
+local cooldown = false
+
+local function createTracer(startPos: Vector3, endPos: Vector3)
+	local p0 = Instance.new(&quot;Part&quot;)
+	p0.Size = Vector3.new(0.1, 0.1, 0.1)
+	p0.Position = startPos
+	p0.Anchored = true
+	p0.CanCollide = false
+	p0.Transparency = 1
+	p0.Parent = Workspace
+
+	local p1 = Instance.new(&quot;Part&quot;)
+	p1.Size = Vector3.new(0.1, 0.1, 0.1)
+	p1.Position = endPos
+	p1.Anchored = true
+	p1.CanCollide = false
+	p1.Transparency = 1
+	p1.Parent = Workspace
+
+	local att0 = Instance.new(&quot;Attachment&quot;)
+	att0.Parent = p0
+	local att1 = Instance.new(&quot;Attachment&quot;)
+	att1.Parent = p1
+
+	local beam = Instance.new(&quot;Beam&quot;)
+	beam.Attachment0 = att0
+	beam.Attachment1 = att1
+	beam.Color = ColorSequence.new(Color3.fromRGB(255, 180, 50), Color3.fromRGB(255, 60, 20))
+	beam.Width0 = 0.25
+	beam.Width1 = 0.1
+	beam.FaceCamera = true
+	beam.Parent = p0
+
+	Debris:AddItem(p0, 0.15)
+	Debris:AddItem(p1, 0.15)
+end
+
+Tool.Activated:Connect(function()
+	if cooldown then return end
+	local character = LocalPlayer.Character
+	if not character then return end
+	local handle = Tool:FindFirstChild(&quot;Handle&quot;) :: BasePart?
+	if not handle then return end
+
+	cooldown = true
+	task.delay(0.85, function()
+		cooldown = false
+	end)
+
+	local sound = handle:FindFirstChildOfClass(&quot;Sound&quot;)
+	if sound then
+		sound:Play()
+	end
+
+	local mouse = LocalPlayer:GetMouse()
+	local targetPos = mouse.Hit.Position
+	local startPos = handle.Position
+	local baseDir = (targetPos - startPos).Unit
+
+	local raycastParams = RaycastParams.new()
+	raycastParams.FilterDescendantsInstances = { character }
+	raycastParams.FilterType = RaycastFilterType.Exclude
+
+	-- Fire 8 spread pellets
+	for _ = 1, 8 do
+		local spread = Vector3.new(
+			(math.random() - 0.5) * 0.12,
+			(math.random() - 0.5) * 0.12,
+			(math.random() - 0.5) * 0.12
+		)
+		local pelletDir = (baseDir + spread).Unit
+
+		local hitPos = startPos + pelletDir * 120
+		local result = Workspace:Raycast(startPos, pelletDir * 120, raycastParams)
+		if result then
+			hitPos = result.Position
+		end
+		createTracer(startPos, hitPos)
+
+		ShootRemote:FireServer(&quot;Shotgun&quot;, startPos, pelletDir)
+	end
+end)
+</string>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Tool" referent="RBX_34">
+      <Properties>
+        <string name="Name">Толкатель (Push Hands)</string>
+        <bool name="RequiresHandle">true</bool>
+        <bool name="CanBeDropped">true</bool>
+      </Properties>
+      <Item class="Part" referent="RBX_35">
+        <Properties>
+          <string name="Name">Handle</string>
+          <Vector3 name="size">
+            <X>0.6</X>
+            <Y>0.8</Y>
+            <Z>1.4</Z>
+          </Vector3>
+          <Color3 name="Color">
+            <R>0.9</R>
+            <G>0.8</G>
+            <B>0.7</B>
+          </Color3>
+          <bool name="Anchored">false</bool>
+          <bool name="CanCollide">false</bool>
+        </Properties>
+        <Item class="Sound" referent="RBX_36">
+          <Properties>
+            <string name="Name">ActionSound</string>
+            <string name="SoundId">rbxassetid://138090596</string>
+            <float name="Volume">0.8</float>
+          </Properties>
+        </Item>
+      </Item>
+      <Item class="LocalScript" referent="RBX_37">
+        <Properties>
+          <string name="Name">ClientScript</string>
+          <string name="Source">--!strict
+-- PushClient.client.luau
+-- Client tool script for pushing other players and dummies into ragdoll
+
+local Tool = script.Parent :: Tool
+local Players = game:GetService(&quot;Players&quot;)
+local ReplicatedStorage = game:GetService(&quot;ReplicatedStorage&quot;)
+local Workspace = game:GetService(&quot;Workspace&quot;)
+
+local LocalPlayer = Players.LocalPlayer
+local RequestPushRemote = ReplicatedStorage:WaitForChild(&quot;RequestPush&quot;) :: RemoteEvent
+
+local cooldown = false
+
+Tool.Activated:Connect(function()
+	if cooldown then return end
+	local character = LocalPlayer.Character
+	if not character then return end
+	local hrp = character:FindFirstChild(&quot;HumanoidRootPart&quot;) :: BasePart?
+	if not hrp then return end
+
+	cooldown = true
+	task.delay(0.8, function()
+		cooldown = false
+	end)
+
+	-- Find target in front of player
+	local rayOrigin = hrp.Position
+	local rayDirection = hrp.CFrame.LookVector * 8
+
+	local raycastParams = RaycastParams.new()
+	raycastParams.FilterDescendantsInstances = { character }
+	raycastParams.FilterType = RaycastFilterType.Exclude
+
+	local result = Workspace:Raycast(rayOrigin, rayDirection, raycastParams)
+	if result and result.Instance then
+		local targetModel = result.Instance:FindFirstAncestorOfClass(&quot;Model&quot;)
+		if targetModel and targetModel:FindFirstChildOfClass(&quot;Humanoid&quot;) then
+			RequestPushRemote:FireServer(targetModel)
+		end
+	end
+end)
+</string>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Tool" referent="RBX_38">
+      <Properties>
+        <string name="Name">Жезл Рэгдолла (Wand)</string>
+        <bool name="RequiresHandle">true</bool>
+        <bool name="CanBeDropped">true</bool>
+      </Properties>
+      <Item class="Part" referent="RBX_39">
+        <Properties>
+          <string name="Name">Handle</string>
+          <Vector3 name="size">
+            <X>0.6</X>
+            <Y>0.8</Y>
+            <Z>1.4</Z>
+          </Vector3>
+          <Color3 name="Color">
+            <R>0.2</R>
+            <G>0.8</G>
+            <B>1.0</B>
+          </Color3>
+          <bool name="Anchored">false</bool>
+          <bool name="CanCollide">false</bool>
+        </Properties>
+        <Item class="Sound" referent="RBX_40">
+          <Properties>
+            <string name="Name">ActionSound</string>
+            <string name="SoundId">rbxassetid://131237241</string>
+            <float name="Volume">0.8</float>
+          </Properties>
+        </Item>
+      </Item>
+      <Item class="LocalScript" referent="RBX_41">
+        <Properties>
+          <string name="Name">ClientScript</string>
+          <string name="Source">--!strict
+-- WandClient.client.luau
+-- Magic testing wand to click and toggle ragdoll on any dummy or player
+
+local Tool = script.Parent :: Tool
+local Players = game:GetService(&quot;Players&quot;)
+local ReplicatedStorage = game:GetService(&quot;ReplicatedStorage&quot;)
+local Workspace = game:GetService(&quot;Workspace&quot;)
+
+local LocalPlayer = Players.LocalPlayer
+local ToggleRagdollRemote = ReplicatedStorage:WaitForChild(&quot;ToggleRagdoll&quot;) :: RemoteEvent
+local RequestPushRemote = ReplicatedStorage:WaitForChild(&quot;RequestPush&quot;) :: RemoteEvent
+
+Tool.Activated:Connect(function()
+	local mouse = LocalPlayer:GetMouse()
+	local targetPart = mouse.Target
+	if not targetPart then return end
+
+	local targetModel = targetPart:FindFirstAncestorOfClass(&quot;Model&quot;)
+	if targetModel and targetModel:FindFirstChildOfClass(&quot;Humanoid&quot;) then
+		-- Toggle ragdoll on targeted character
+		ToggleRagdollRemote:FireServer(targetModel)
+	end
+end)
+</string>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+</roblox>

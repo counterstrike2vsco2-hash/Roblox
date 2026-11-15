@@ -1,0 +1,45 @@
+{
+  "name": "Project_CARL_Ragdoll_Engine",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "Shared": {
+        "$path": "src/shared"
+      }
+    },
+    "ServerScriptService": {
+      "$path": "src/server"
+    },
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "$path": "src/client"
+      }
+    },
+    "StarterPack": {
+      "PushTool": {
+        "$className": "Tool",
+        "PushClient": {
+          "$path": "src/starterpack/PushTool/PushClient.client.luau"
+        }
+      },
+      "Pistol": {
+        "$className": "Tool",
+        "GunClient": {
+          "$path": "src/starterpack/Pistol/GunClient.client.luau"
+        }
+      },
+      "Shotgun": {
+        "$className": "Tool",
+        "ShotgunClient": {
+          "$path": "src/starterpack/Shotgun/ShotgunClient.client.luau"
+        }
+      },
+      "RagdollWand": {
+        "$className": "Tool",
+        "WandClient": {
+          "$path": "src/starterpack/RagdollWand/WandClient.client.luau"
+        }
+      }
+    }
+  }
+}
