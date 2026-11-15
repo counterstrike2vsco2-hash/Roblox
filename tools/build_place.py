@@ -157,8 +157,6 @@ def build():
     sss, _ = create_item(root, "ServerScriptService", next_ref(), "ServerScriptService")
     server_scripts = [
         ("RagdollServer", "src/server/RagdollServer.server.luau"),
-        ("DummyManager", "src/server/DummyManager.server.luau"),
-        ("MapBuilder", "src/server/MapBuilder.server.luau"),
     ]
     for s_name, s_path in server_scripts:
         s_item, s_props = create_item(sss, "Script", next_ref(), s_name)
